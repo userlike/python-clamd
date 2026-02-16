@@ -1,10 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+from importlib.metadata import version, PackageNotFoundError
 
 try:
-    __version__ = __import__('pkg_resources').get_distribution('clamd').version
-except:
+    __version__ = version('python-clamd-fork')
+except PackageNotFoundError:
     __version__ = ''
 
 # $Source$
@@ -270,46 +268,3 @@ class ClamdNetworkSocket(object):
             return scan_response.match(msg).group("path", "virus", "status")
         except AttributeError:
             raise ResponseError(msg.rsplit("ERROR", 1)[0])
-
-
-class ClamdUnixSocket(ClamdNetworkSocket):
-    """
-    Class for using clamd with an unix socket
-    """
-    def __init__(self, path="/var/run/clamav/clamd.ctl", timeout=None):
-        """
-        class initialisation
-
-        path (string) : unix socket path
-        timeout (float or None) : socket timeout
-        """
-
-        self.unix_socket = path
-        self.timeout = timeout
-
-    def _init_socket(self):
-        """
-        internal use only
-        """
-        try:
-            self.clamd_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            self.clamd_socket.connect(self.unix_socket)
-            self.clamd_socket.settimeout(self.timeout)
-        except socket.error:
-            e = sys.exc_info()[1]
-            raise ConnectionError(self._error_message(e))
-
-    def _error_message(self, exception):
-        # args for socket.error can either be (errno, "message")
-        # or just "message"
-        if len(exception.args) == 1:
-            return "Error connecting to {path}. {msg}.".format(
-                path=self.unix_socket,
-                msg=exception.args[0]
-            )
-        else:
-            return "Error {erno} connecting {path}. {msg}.".format(
-                erno=exception.args[0],
-                path=self.unix_socket,
-                msg=exception.args[1]
-            )
