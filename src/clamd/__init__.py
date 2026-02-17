@@ -1,11 +1,9 @@
 from importlib.metadata import version, PackageNotFoundError
 
 try:
-    __version__ = version('python-clamd-fork')
+    __version__ = version('clamd')
 except PackageNotFoundError:
     __version__ = ''
-
-# $Source$
 
 
 import socket
